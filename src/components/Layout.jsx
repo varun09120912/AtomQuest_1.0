@@ -1,23 +1,54 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { AppContext } from '../store/AppContext';
-import { Target, CheckSquare, Users, BarChart2, LogOut, Settings, ShieldAlert, LayoutDashboard } from 'lucide-react';
+import { Target, CheckSquare, Users, BarChart2, LogOut, Settings, ShieldAlert, LayoutDashboard, AlertTriangle } from 'lucide-react';
 
 export default function Layout() {
-  const { currentUser, logout, cycles } = useContext(AppContext);
+  const { currentUser, logout, cycles, notifications, setNotifications } = useContext(AppContext);
   const navigate = useNavigate();
   const activeCycle = cycles.find(c => c.isActive);
+
+  // Find unread popup reminders
+  const activeReminder = notifications?.find(n => n.userId === currentUser?.id && n.type === 'reminder_popup' && !n.read);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const dismissReminder = () => {
+    if (!activeReminder) return;
+    const updated = notifications.map(n => n.id === activeReminder.id ? { ...n, read: true } : n);
+    setNotifications(updated);
+    localStorage.setItem('atomquest_notifications', JSON.stringify(updated));
+  };
+
   const navItemClass = ({ isActive }) => 
     `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-medium ${isActive ? 'bg-primary-600 text-white shadow-md shadow-primary-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden relative">
+      
+      {/* Reminder Popup Modal */}
+      {activeReminder && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform scale-100 animate-in fade-in zoom-in duration-200">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-6">
+              <AlertTriangle size={32} className="text-amber-600" />
+            </div>
+            <h3 className="text-2xl font-extrabold text-center text-slate-900 mb-2">{activeReminder.title}</h3>
+            <p className="text-center text-slate-600 font-medium mb-8 leading-relaxed">
+              {activeReminder.message}
+            </p>
+            <button 
+              onClick={dismissReminder}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg"
+            >
+              I Understand, Go to Check-ins
+            </button>
+          </div>
+        </div>
+      )}
       {/* Sidebar - Premium Dark Floating */}
       <div className="w-72 bg-dark text-white flex flex-col m-4 rounded-3xl shadow-2xl relative overflow-hidden">
         {/* Subtle decorative background pulse */}

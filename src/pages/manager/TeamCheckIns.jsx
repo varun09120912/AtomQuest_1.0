@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { CheckSquare } from 'lucide-react';
 
 export default function TeamCheckIns() {
-  const { currentUser, users, checkIns, setCheckIns, goals } = useContext(AppContext);
+  const { currentUser, users, checkIns, setCheckIns, goals, notifications, setNotifications } = useContext(AppContext);
   const myTeam = users.filter(u => u.managerId === currentUser.id);
   const teamIds = myTeam.map(u => u.id);
   const teamCheckIns = checkIns.filter(c => teamIds.includes(c.employeeId));
@@ -17,6 +17,22 @@ export default function TeamCheckIns() {
     setCheckIns(updated);
     localStorage.setItem('atomquest_checkIns', JSON.stringify(updated));
     alert('Comment saved!');
+  };
+
+  const handleSendReminder = (emp) => {
+    const newNotification = {
+      id: 'n' + Date.now(),
+      userId: emp.id,
+      title: 'Action Required',
+      message: `Your manager ${currentUser.name} has sent you a reminder to submit your Q1 Check-in immediately.`,
+      type: 'reminder_popup',
+      timestamp: Date.now(),
+      read: false
+    };
+    const updated = [...notifications, newNotification];
+    setNotifications(updated);
+    localStorage.setItem('atomquest_notifications', JSON.stringify(updated));
+    alert(`Reminder notification successfully sent to ${emp.name}!`);
   };
 
   return (
@@ -37,7 +53,7 @@ export default function TeamCheckIns() {
                   <h3 className="font-bold text-slate-800 text-lg">{emp.name}</h3>
                   <p className="text-amber-600 text-sm font-medium">Check-in not submitted yet.</p>
                 </div>
-                <button className="btn-secondary text-amber-700 border-amber-200 hover:bg-amber-50">Send Reminder</button>
+                <button onClick={() => handleSendReminder(emp)} className="btn-secondary text-amber-700 border-amber-200 hover:bg-amber-50">Send Reminder</button>
               </div>
             );
           }
