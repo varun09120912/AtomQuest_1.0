@@ -49,7 +49,7 @@ export default function Login() {
           <div className="text-xs text-slate-500 space-y-1">
             <p>Admin: admin@atomquest.com / admin123</p>
             <p>Manager: manager@atomquest.com / manager123</p>
-            <p>Employee: employee@atomquest.com / employee123</p>
+            <p>Employee: kunal@atomquest.com / employee123</p>
           </div>
         </div>
       </div>

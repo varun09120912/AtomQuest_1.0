@@ -1,12 +1,12 @@
 export const seedUsers = [
-  { id: 'u1', name: 'Priya Sharma', email: 'employee@atomquest.com', password: 'employee123', role: 'employee', dept: 'Engineering', managerId: 'm1', grade: 'L2' },
-  { id: 'u2', name: 'Amit Kulkarni', email: 'amit@atomquest.com', password: 'employee123', role: 'employee', dept: 'Engineering', managerId: 'm1', grade: 'L2' },
-  { id: 'u3', name: 'Sara Thomas', email: 'sara@atomquest.com', password: 'employee123', role: 'employee', dept: 'Sales', managerId: 'm2', grade: 'L3' },
-  { id: 'u4', name: 'Dev Patel', email: 'dev@atomquest.com', password: 'employee123', role: 'employee', dept: 'Engineering', managerId: 'm1', grade: 'L1' },
-  { id: 'u5', name: 'Neha Roy', email: 'neha@atomquest.com', password: 'employee123', role: 'employee', dept: 'Marketing', managerId: 'm2', grade: 'L2' },
+  { id: 'u1', name: 'Kunal Pawar', email: 'kunal@atomquest.com', password: 'employee123', role: 'employee', dept: 'Engineering', managerId: 'm1', grade: 'L2' },
+  { id: 'u2', name: 'Pratik Karadkar', email: 'pratik@atomquest.com', password: 'employee123', role: 'employee', dept: 'Engineering', managerId: 'm1', grade: 'L2' },
+  { id: 'u3', name: 'Ayush Dhore', email: 'ayush@atomquest.com', password: 'employee123', role: 'employee', dept: 'Sales', managerId: 'm2', grade: 'L3' },
+  { id: 'u4', name: 'Soham Chandwadkar', email: 'soham@atomquest.com', password: 'employee123', role: 'employee', dept: 'Engineering', managerId: 'm1', grade: 'L1' },
+  { id: 'u5', name: 'Simon Joshi', email: 'simon@atomquest.com', password: 'employee123', role: 'employee', dept: 'Marketing', managerId: 'm2', grade: 'L2' },
   { id: 'm1', name: 'Charlie Manager', email: 'manager@atomquest.com', password: 'manager123', role: 'manager', dept: 'Engineering', managerId: 'a1', grade: 'L4' },
   { id: 'm2', name: 'Sales Manager', email: 'salesmgr@atomquest.com', password: 'manager123', role: 'manager', dept: 'Sales', managerId: 'a1', grade: 'L4' },
-  { id: 'a1', name: 'Diana Admin', email: 'admin@atomquest.com', password: 'admin123', role: 'admin', dept: 'HR', managerId: null, grade: 'L5' }
+  { id: 'a1', name: 'Varun Kadadi', email: 'admin@atomquest.com', password: 'admin123', role: 'admin', dept: 'HR', managerId: null, grade: 'L5' }
 ];
 
 export const seedCycles = [
