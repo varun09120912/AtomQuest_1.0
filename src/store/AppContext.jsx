@@ -14,7 +14,7 @@ export const AppProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const isSeeded = localStorage.getItem('atomquest_seeded_v2');
+    const isSeeded = localStorage.getItem('atomquest_seeded_v3');
     if (!isSeeded) {
       localStorage.setItem('atomquest_users', JSON.stringify(seedUsers));
       localStorage.setItem('atomquest_cycles', JSON.stringify(seedCycles));
@@ -23,7 +23,7 @@ export const AppProvider = ({ children }) => {
       localStorage.setItem('atomquest_escalations', JSON.stringify(seedEscalations));
       localStorage.setItem('atomquest_notifications', JSON.stringify(seedNotifications));
       localStorage.setItem('atomquest_auditLog', JSON.stringify(seedAuditLog));
-      localStorage.setItem('atomquest_seeded_v2', 'true');
+      localStorage.setItem('atomquest_seeded_v3', 'true');
     }
 
     setUsers(JSON.parse(localStorage.getItem('atomquest_users') || '[]'));

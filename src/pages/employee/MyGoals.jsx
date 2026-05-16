@@ -107,10 +107,12 @@ export default function MyGoals() {
             <div>
               <label className="form-label">Thrust Area</label>
               <select className="form-control" value={newGoal.thrustArea} onChange={e => setNewGoal({...newGoal, thrustArea: e.target.value})}>
-                <option>Financial</option>
-                <option>Customer</option>
-                <option>Internal Process</option>
-                <option>Learning & Growth</option>
+                <option>Channel & Distribution Growth</option>
+                <option>Manufacturing Excellence</option>
+                <option>Product Innovation</option>
+                <option>Energy Efficiency & Sustainability</option>
+                <option>Customer Delight & NPS</option>
+                <option>People & Culture</option>
               </select>
             </div>
           </div>
