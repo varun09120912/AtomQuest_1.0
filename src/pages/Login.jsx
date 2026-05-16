@@ -26,9 +26,9 @@ export default function Login() {
   };
 
   const quickFill = (role) => {
-    if (role === 'admin') { setEmail('admin@atomquest.com'); setPassword('admin123'); }
-    if (role === 'manager') { setEmail('manager@atomquest.com'); setPassword('manager123'); }
-    if (role === 'employee') { setEmail('kunal@atomquest.com'); setPassword('employee123'); }
+    if (role === 'admin') { setEmail('admin@atomberg.com'); setPassword('password123'); }
+    if (role === 'manager') { setEmail('manager@atomberg.com'); setPassword('password123'); }
+    if (role === 'employee') { setEmail('employee@atomberg.com'); setPassword('password123'); }
   };
 
   return (

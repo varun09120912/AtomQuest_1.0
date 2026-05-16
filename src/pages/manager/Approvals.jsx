@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { CheckSquare, AlertCircle } from 'lucide-react';
 
 export default function Approvals() {
-  const { currentUser, goals, saveGoals, users, notifications, setNotifications, saveAuditLog, auditLog } = useContext(AppContext);
+  const { currentUser, goals, saveGoals, users, notifications, saveNotifications, saveAuditLog, auditLog } = useContext(AppContext);
   const myTeam = users.filter(u => u.managerId === currentUser.id);
   const teamIds = myTeam.map(u => u.id);
   
@@ -16,11 +16,9 @@ export default function Approvals() {
     );
     saveGoals(updated);
     const emp = users.find(u => u.id === employeeId);
-    // Notify employee
     const notif = { id: 'n'+Date.now(), userId: employeeId, title: '🎉 Goals Approved!', message: `${currentUser.name} has approved all your submitted goals. They are now locked and active for this cycle.`, type: 'goal_approved', timestamp: Date.now(), read: false };
     const updatedN = [...(notifications||[]), notif];
-    setNotifications(updatedN);
-    localStorage.setItem('atomquest_notifications', JSON.stringify(updatedN));
+    saveNotifications(updatedN);
     // Audit
     if (saveAuditLog) saveAuditLog([...(auditLog||[]), { id:'al'+Date.now(), timestamp:Date.now(), actor:currentUser.name, role:'manager', action:'GOALS_APPROVED', affectedPerson: emp?.name || employeeId, details:`Manager approved all pending goals for ${emp?.name}.` }]);
   };
@@ -31,11 +29,9 @@ export default function Approvals() {
     );
     saveGoals(updated);
     const emp = users.find(u => u.id === employeeId);
-    // Notify employee
     const notif = { id: 'n'+Date.now(), userId: employeeId, title: '↩️ Goals Returned for Revision', message: `${currentUser.name} has returned your goals for revision. Please review and resubmit.`, type: 'goal_returned', timestamp: Date.now(), read: false };
     const updatedN = [...(notifications||[]), notif];
-    setNotifications(updatedN);
-    localStorage.setItem('atomquest_notifications', JSON.stringify(updatedN));
+    saveNotifications(updatedN);
   };
 
   return (

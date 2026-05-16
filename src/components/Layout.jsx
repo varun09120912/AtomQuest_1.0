@@ -4,7 +4,7 @@ import { AppContext } from '../store/AppContext';
 import { Target, CheckSquare, Users, BarChart2, LogOut, Settings, ShieldAlert, LayoutDashboard, AlertTriangle, Bell, X } from 'lucide-react';
 
 export default function Layout() {
-  const { currentUser, logout, cycles, notifications, setNotifications } = useContext(AppContext);
+  const { currentUser, logout, cycles, notifications, saveNotifications } = useContext(AppContext);
   const navigate = useNavigate();
   const activeCycle = cycles.find(c => c.isActive);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -21,14 +21,12 @@ export default function Layout() {
   const dismissReminder = () => {
     if (!activeReminder) return;
     const updated = notifications.map(n => n.id === activeReminder.id ? { ...n, read: true } : n);
-    setNotifications(updated);
-    localStorage.setItem('atomquest_notifications', JSON.stringify(updated));
+    saveNotifications(updated);
   };
 
   const markAllRead = () => {
     const updated = notifications.map(n => n.userId === currentUser?.id ? { ...n, read: true } : n);
-    setNotifications(updated);
-    localStorage.setItem('atomquest_notifications', JSON.stringify(updated));
+    saveNotifications(updated);
   };
 
   const navItemClass = ({ isActive }) =>

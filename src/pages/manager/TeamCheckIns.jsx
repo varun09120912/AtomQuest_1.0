@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { CheckSquare } from 'lucide-react';
 
 export default function TeamCheckIns() {
-  const { currentUser, users, checkIns, setCheckIns, goals, notifications, setNotifications } = useContext(AppContext);
+  const { currentUser, users, checkIns, saveCheckIns, goals, notifications, saveNotifications } = useContext(AppContext);
   const myTeam = users.filter(u => u.managerId === currentUser.id);
   const teamIds = myTeam.map(u => u.id);
   const teamCheckIns = checkIns.filter(c => teamIds.includes(c.employeeId));
@@ -14,8 +14,7 @@ export default function TeamCheckIns() {
     const comment = comments[checkInId];
     if (!comment) return;
     const updated = checkIns.map(c => c.id === checkInId ? { ...c, managerComment: comment, managerCommentAt: Date.now() } : c);
-    setCheckIns(updated);
-    localStorage.setItem('atomquest_checkIns', JSON.stringify(updated));
+    saveCheckIns(updated);
     alert('Comment saved!');
   };
 
@@ -30,8 +29,7 @@ export default function TeamCheckIns() {
       read: false
     };
     const updated = [...notifications, newNotification];
-    setNotifications(updated);
-    localStorage.setItem('atomquest_notifications', JSON.stringify(updated));
+    saveNotifications(updated);
     alert(`Reminder notification successfully sent to ${emp.name}!`);
   };
 

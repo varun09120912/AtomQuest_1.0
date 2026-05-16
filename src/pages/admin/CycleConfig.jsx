@@ -3,12 +3,11 @@ import { AppContext } from '../../store/AppContext';
 import { Settings } from 'lucide-react';
 
 export default function CycleConfig() {
-  const { cycles, setCycles } = useContext(AppContext);
+  const { cycles, saveCycles } = useContext(AppContext);
 
   const toggleActive = (id) => {
     const updated = cycles.map(c => ({ ...c, isActive: c.id === id }));
-    setCycles(updated);
-    localStorage.setItem('atomquest_cycles', JSON.stringify(updated));
+    saveCycles(updated);
   };
 
   return (
@@ -58,11 +57,11 @@ export default function CycleConfig() {
         <div className="mt-4 flex gap-2">
            <button className="btn-secondary" onClick={() => {
               const dummy = [
-                { id: 'c1', name: 'FY2026', phase: 'Phase 1 - Goal Setting', opensAt: '2026-05-01', closesAt: '2026-05-31', isActive: false, year: 2026 },
-                { id: 'c2', name: 'FY2026', phase: 'Q1 Check-in', opensAt: '2026-07-01', closesAt: '2026-07-31', isActive: true, year: 2026 }
+                { id: 'c1', name: 'FY2026', phase: 'Q1', opensAt: '2026-04-01', closesAt: '2026-06-30', isActive: true, year: 2026 },
+                { id: 'c2', name: 'FY2026', phase: 'Q2', opensAt: '2026-07-01', closesAt: '2026-09-30', isActive: false, year: 2026 },
+                { id: 'c3', name: 'FY2026', phase: 'Q3', opensAt: '2026-10-01', closesAt: '2026-12-31', isActive: false, year: 2026 },
               ];
-              setCycles(dummy);
-              localStorage.setItem('atomquest_cycles', JSON.stringify(dummy));
+              saveCycles(dummy);
            }}>
              Populate Demo Phases
            </button>

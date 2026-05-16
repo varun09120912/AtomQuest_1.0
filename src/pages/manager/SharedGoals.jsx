@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { Target, Edit2, Users } from 'lucide-react';
 
 export default function SharedGoals() {
-  const { currentUser, users, goals, setGoals, cycles, notifications, setNotifications } = useContext(AppContext);
+  const { currentUser, users, goals, saveGoals, cycles, notifications, saveNotifications } = useContext(AppContext);
   const activeCycle = cycles.find(c => c.isActive) || cycles[0];
   
   // Admin can push to ANYONE, Manager can push to MY TEAM
@@ -28,49 +28,46 @@ export default function SharedGoals() {
     if (!editingGroupId && selectedEmployees.length === 0) return alert('Select at least one employee');
 
     if (editingGroupId) {
-       const updated = goals.map(g => g.sharedGoalGroupId === editingGroupId 
+        const updated = goals.map(g => g.sharedGoalGroupId === editingGroupId 
           ? { ...g, title: newGoal.title, description: newGoal.description, thrustArea: newGoal.thrustArea, uom: newGoal.uom, target: newGoal.target } 
           : g);
-       setGoals(updated);
-       localStorage.setItem('atomquest_goals', JSON.stringify(updated));
-       alert('Shared goal updated across all assigned employees in real-time!');
-       setEditingGroupId(null);
-    } else {
-       const groupId = 'sg_' + Date.now();
-       const newGoals = selectedEmployees.map(empId => ({
-         ...newGoal,
-         id: 'g' + Date.now() + Math.random(),
-         sharedGoalGroupId: groupId,
-         employeeId: empId,
-         cycleYear: activeCycle?.year,
-         weightage: 10,
-         status: 'draft',
-         sharedFrom: currentUser.id,
-         sharedOwner: false,
-         createdAt: Date.now(),
-         updatedAt: Date.now()
-       }));
+        saveGoals(updated);
+        alert('Shared goal updated across all assigned employees in real-time!');
+        setEditingGroupId(null);
+     } else {
+        const groupId = 'sg_' + Date.now();
+        const newGoals = selectedEmployees.map(empId => ({
+          ...newGoal,
+          id: 'g' + Date.now() + Math.random(),
+          sharedGoalGroupId: groupId,
+          employeeId: empId,
+          cycleYear: activeCycle?.year,
+          weightage: 10,
+          status: 'draft',
+          sharedFrom: currentUser.id,
+          sharedOwner: false,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        }));
 
-       // 🔔 Create a notification for each recipient
-       const newNotifications = selectedEmployees.map(empId => ({
-         id: 'n' + Date.now() + Math.random(),
-         userId: empId,
-         title: 'New Goal Assigned to You',
-         message: `${currentUser.name} has assigned you a new goal: "${newGoal.title}". Please review it in My Goals and adjust your weightage.`,
-         type: 'goal_assigned',
-         timestamp: Date.now(),
-         read: false
-       }));
+        // 🔔 Create a notification for each recipient
+        const newNotifications = selectedEmployees.map(empId => ({
+          id: 'n' + Date.now() + Math.random(),
+          userId: empId,
+          title: 'New Goal Assigned to You',
+          message: `${currentUser.name} has assigned you a new goal: "${newGoal.title}". Please review it in My Goals and adjust your weightage.`,
+          type: 'goal_assigned',
+          timestamp: Date.now(),
+          read: false
+        }));
 
-       const updatedNotifs = [...notifications, ...newNotifications];
-       setNotifications(updatedNotifs);
-       localStorage.setItem('atomquest_notifications', JSON.stringify(updatedNotifs));
+        const updatedNotifs = [...notifications, ...newNotifications];
+        saveNotifications(updatedNotifs);
 
-       const updated = [...goals, ...newGoals];
-       setGoals(updated);
-       localStorage.setItem('atomquest_goals', JSON.stringify(updated));
-       alert('Goal successfully pushed to selected team members! They have been notified.');
-    }
+        const updated = [...goals, ...newGoals];
+        saveGoals(updated);
+        alert('Goal successfully pushed to selected team members! They have been notified.');
+     }
     
     setNewGoal({ title: '', description: '', thrustArea: 'Financial', uom: 'numeric_max', target: '' });
     setSelectedEmployees([]);

@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { Target, Plus, Trash2, Lock, AlertCircle } from 'lucide-react';
 
 export default function MyGoals() {
-  const { currentUser, goals, saveGoals, cycles, notifications, setNotifications, auditLog, saveAuditLog, users } = useContext(AppContext);
+  const { currentUser, goals, saveGoals, cycles, notifications, saveNotifications, auditLog, saveAuditLog, users } = useContext(AppContext);
   const activeCycle = cycles.find(c => c.isActive) || cycles[0];
   
   const [showForm, setShowForm] = useState(false);
@@ -12,9 +12,14 @@ export default function MyGoals() {
   const myGoals = goals.filter(g => g.employeeId === currentUser.id);
   const totalWeightage = myGoals.reduce((sum, g) => sum + Number(g.weightage), 0);
   
-  const isDraftPhase = myGoals.length === 0 || myGoals.every(g => g.status === 'draft' || g.status === 'returned');
+  // A user can edit/add if they have NO pending goals. 
+  // If they have pending goals, the whole sheet is locked for review.
   const isPending = myGoals.some(g => g.status === 'pending');
   const isApproved = myGoals.some(g => g.status === 'approved');
+  const hasDrafts = myGoals.some(g => g.status === 'draft' || g.status === 'returned');
+
+  // Logic: Show "Add" and "Submit" buttons if nothing is pending
+  const canEdit = !isPending;
 
   const handleAddGoal = (e) => {
     e.preventDefault();
@@ -69,8 +74,7 @@ export default function MyGoals() {
         read: false
       };
       const updatedN = [...(notifications || []), notif];
-      setNotifications(updatedN);
-      localStorage.setItem('atomquest_notifications', JSON.stringify(updatedN));
+      saveNotifications(updatedN);
     }
 
     // Add audit log
@@ -97,11 +101,11 @@ export default function MyGoals() {
           <h1 className="text-3xl font-bold text-slate-900">My Goals</h1>
           <p className="text-slate-500 mt-1">Manage your objectives for {activeCycle?.name}</p>
         </div>
-        {isDraftPhase && (
+        {canEdit && (
           <button 
             className="btn-primary flex items-center gap-2" 
             onClick={() => setShowForm(true)}
-            disabled={myGoals.length >= 8}
+            disabled={myGoals.length >= 8 || totalWeightage >= 100}
           >
             <Plus size={18} /> Add Goal
           </button>
@@ -199,7 +203,7 @@ export default function MyGoals() {
                 </h3>
                 <p className="text-sm text-slate-500 mt-1">{g.description}</p>
               </div>
-              {isDraftPhase && (
+              {canEdit && g.status !== 'approved' && (
                 <button onClick={() => handleDelete(g.id)} className="text-red-400 hover:text-red-600 transition-colors p-2">
                   <Trash2 size={18} />
                 </button>
@@ -223,10 +227,10 @@ export default function MyGoals() {
         )}
       </div>
 
-      {isDraftPhase && myGoals.length > 0 && (
+      {canEdit && hasDrafts && (
         <div className="mt-8 flex justify-end">
           <button 
-            className="btn-primary px-8 py-3 text-lg"
+            className="btn-primary px-8 py-3 text-lg shadow-xl shadow-primary-500/20"
             onClick={handleSubmit}
             disabled={totalWeightage !== 100}
           >

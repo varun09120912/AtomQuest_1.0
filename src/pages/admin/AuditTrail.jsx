@@ -6,14 +6,16 @@ export default function AuditTrail() {
   const { auditLog } = useContext(AppContext);
 
   const exportCSV = () => {
-    const headers = ['Timestamp', 'Actor', 'Action', 'Details'];
-    const rows = auditLog.map(log => [
+    const headers = ['Timestamp', 'Actor', 'Role', 'Action', 'Affected Person', 'Details'];
+    const rows = [...auditLog].sort((a,b) => b.timestamp - a.timestamp).map(log => [
       new Date(log.timestamp).toLocaleString(),
       log.actor,
+      log.role || '',
       log.action,
+      log.affectedPerson || '',
       log.details
-    ]);
-    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`));
+    const csvContent = [headers.map(h => `"${h}"`), ...rows].map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -54,14 +56,14 @@ export default function AuditTrail() {
             {auditLog.length === 0 ? (
                <tr><td colSpan="4" className="p-8 text-center text-slate-500 font-medium">No audit logs available.</td></tr>
             ) : (
-              auditLog.map(log => (
+              {[...auditLog].sort((a,b) => b.timestamp - a.timestamp).map(log => (
                 <tr key={log.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="p-5 text-sm text-slate-500">{new Date(log.timestamp).toLocaleString()}</td>
+                  <td className="p-5 text-sm text-slate-500 whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</td>
                   <td className="p-5 font-bold text-slate-800">{log.actor}</td>
                   <td className="p-5 text-primary-700 font-medium">{log.action}</td>
                   <td className="p-5 text-slate-600 text-sm">{log.details}</td>
                 </tr>
-              ))
+              ))}
             )}
           </tbody>
         </table>

@@ -1,7 +1,17 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { seedUsers, seedCycles, seedGoals, seedCheckIns, seedEscalations, seedNotifications, seedAuditLog } from './seedData';
 
 export const AppContext = createContext();
+
+// Essential demo users so the user can actually login to test
+const initialUsers = [
+  { id: 'emp1', name: 'Varun Employee', email: 'employee@atomberg.com', password: 'password123', role: 'employee', managerId: 'mgr1', dept: 'Engineering' },
+  { id: 'mgr1', name: 'Atom Manager', email: 'manager@atomberg.com', password: 'password123', role: 'manager', dept: 'Engineering' },
+  { id: 'adm1', name: 'Atom Admin', email: 'admin@atomberg.com', password: 'password123', role: 'admin', dept: 'HR' },
+];
+
+const initialCycles = [
+  { id: 'c1', name: 'FY 2026-27 Annual Cycle', year: '2026', isActive: true, status: 'Goal Setting' }
+];
 
 export const AppProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
@@ -14,20 +24,34 @@ export const AppProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const isSeeded = localStorage.getItem('atomquest_seeded_v4');
-    if (!isSeeded) {
-      localStorage.setItem('atomquest_users', JSON.stringify(seedUsers));
-      localStorage.setItem('atomquest_cycles', JSON.stringify(seedCycles));
-      localStorage.setItem('atomquest_goals', JSON.stringify(seedGoals));
-      localStorage.setItem('atomquest_checkIns', JSON.stringify(seedCheckIns));
-      localStorage.setItem('atomquest_escalations', JSON.stringify(seedEscalations));
-      localStorage.setItem('atomquest_notifications', JSON.stringify(seedNotifications));
-      localStorage.setItem('atomquest_auditLog', JSON.stringify(seedAuditLog));
-      localStorage.setItem('atomquest_seeded_v4', 'true');
+    // 🚀 CLEAN SLATE MIGRATION (V5)
+    // Ensures that old username-based data doesn't break the new email-based login.
+    const currentVersion = 'atomquest_v5_stable';
+    const installedVersion = localStorage.getItem('atomquest_version');
+
+    if (installedVersion !== currentVersion) {
+      // Clear old data to prevent crashes
+      localStorage.removeItem('atomquest_users');
+      localStorage.removeItem('atomquest_goals');
+      localStorage.removeItem('atomquest_notifications');
+      localStorage.removeItem('atomquest_checkIns');
+      localStorage.removeItem('atomquest_cycles');
+      localStorage.removeItem('atomquest_auditLog');
+      localStorage.setItem('atomquest_version', currentVersion);
     }
 
-    setUsers(JSON.parse(localStorage.getItem('atomquest_users') || '[]'));
-    setCycles(JSON.parse(localStorage.getItem('atomquest_cycles') || '[]'));
+    const storedUsers = localStorage.getItem('atomquest_users');
+    const storedCycles = localStorage.getItem('atomquest_cycles');
+    
+    const finalUsers = storedUsers ? JSON.parse(storedUsers) : initialUsers;
+    const finalCycles = storedCycles ? JSON.parse(storedCycles) : initialCycles;
+
+    setUsers(finalUsers);
+    setCycles(finalCycles);
+    
+    if (!storedUsers) localStorage.setItem('atomquest_users', JSON.stringify(initialUsers));
+    if (!storedCycles) localStorage.setItem('atomquest_cycles', JSON.stringify(initialCycles));
+
     setGoals(JSON.parse(localStorage.getItem('atomquest_goals') || '[]'));
     setCheckIns(JSON.parse(localStorage.getItem('atomquest_checkIns') || '[]'));
     setEscalations(JSON.parse(localStorage.getItem('atomquest_escalations') || '[]'));
@@ -38,10 +62,6 @@ export const AppProvider = ({ children }) => {
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
   }, []);
 
-  // ─── FIX: Deferred persist
-  // State updates React immediately (fast UI paint).
-  // localStorage write is deferred with setTimeout(0) so the browser
-  // can render FIRST, then persist — eliminating the 1,944ms INP block.
   const persist = (key, value) => {
     setTimeout(() => {
       try {
@@ -52,7 +72,6 @@ export const AppProvider = ({ children }) => {
     }, 0);
   };
 
-  // Smart save wrappers: update React state instantly, write disk asynchronously
   const saveGoals = (updated) => { setGoals(updated); persist('atomquest_goals', updated); };
   const saveCheckIns = (updated) => { setCheckIns(updated); persist('atomquest_checkIns', updated); };
   const saveEscalations = (updated) => { setEscalations(updated); persist('atomquest_escalations', updated); };
@@ -62,7 +81,8 @@ export const AppProvider = ({ children }) => {
   const saveCycles = (updated) => { setCycles(updated); persist('atomquest_cycles', updated); };
 
   const login = (email, password) => {
-    const user = users.find(u => u.email === email && u.password === password);
+    // Case-insensitive email check for demo convenience
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
     if (user) {
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
@@ -80,7 +100,6 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider value={{
       users, cycles, goals, checkIns, escalations, notifications, auditLog, currentUser,
       login, logout,
-      setGoals, setCheckIns, setEscalations, setNotifications, setAuditLog, setUsers, setCycles,
       saveGoals, saveCheckIns, saveEscalations, saveNotifications, saveAuditLog, saveUsers, saveCycles
     }}>
       {children}

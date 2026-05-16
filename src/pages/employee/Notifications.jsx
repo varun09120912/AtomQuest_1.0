@@ -3,23 +3,36 @@ import { AppContext } from '../../store/AppContext';
 import { Bell, Check } from 'lucide-react';
 
 export default function Notifications() {
-  const { currentUser, notifications, setNotifications } = useContext(AppContext);
-  const myNotifications = notifications.filter(n => n.userId === currentUser.id);
+  const { currentUser, notifications, saveNotifications } = useContext(AppContext);
+  // Show all non-popup notifications for this user, newest first
+  const myNotifications = notifications
+    .filter(n => n.userId === currentUser.id && n.type !== 'reminder_popup')
+    .slice().sort((a, b) => b.timestamp - a.timestamp);
+  const unreadCount = myNotifications.filter(n => !n.read).length;
 
   const markAsRead = (id) => {
-    const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
-    setNotifications(updated);
-    localStorage.setItem('atomquest_notifications', JSON.stringify(updated));
+    saveNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const markAllRead = () => {
+    saveNotifications(notifications.map(n => n.userId === currentUser.id ? { ...n, read: true } : n));
   };
 
   return (
     <div className="max-w-4xl mx-auto pb-12">
-      <div className="mb-8 flex items-center gap-3">
-        <Bell size={32} className="text-primary-600" />
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Notifications</h1>
-          <p className="text-slate-500 mt-1 font-medium">Updates and alerts regarding your goals.</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Bell size={32} className="text-primary-600" />
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900">Notifications</h1>
+            <p className="text-slate-500 mt-1 font-medium">
+              {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
+            </p>
+          </div>
         </div>
+        {unreadCount > 0 && (
+          <button onClick={markAllRead} className="btn-secondary text-sm">Mark All Read</button>
+        )}
       </div>
 
       <div className="space-y-4">

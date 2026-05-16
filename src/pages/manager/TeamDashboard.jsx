@@ -29,9 +29,9 @@ export default function TeamDashboard() {
           <tbody>
             {myTeam.map(emp => {
               const empGoals = goals.filter(g => g.employeeId === emp.id);
-              const isApproved = empGoals.length > 0 && empGoals.every(g => g.status === 'approved');
-              const isPending = empGoals.some(g => g.status === 'pending');
-              const isDraft = empGoals.every(g => g.status === 'draft') || empGoals.length === 0;
+              const hasApproved = empGoals.some(g => g.status === 'approved');
+              const hasPending = empGoals.some(g => g.status === 'pending');
+              const allApproved = empGoals.length > 0 && empGoals.every(g => g.status === 'approved');
 
               return (
                 <tr key={emp.id} className="border-b border-slate-100 hover:bg-slate-50">
@@ -39,8 +39,9 @@ export default function TeamDashboard() {
                   <td className="p-4 text-slate-600">{emp.dept}</td>
                   <td className="p-4 font-bold text-slate-700">{empGoals.length}</td>
                   <td className="p-4">
-                    {isApproved ? <span className="badge badge-success">Approved</span> :
-                     isPending ? <span className="badge badge-warning">Needs Approval</span> :
+                    {allApproved ? <span className="badge badge-success">All Approved</span> :
+                     hasPending ? <span className="badge badge-warning">Needs Approval</span> :
+                     hasApproved ? <span className="badge" style={{background:'#dbeafe',color:'#1d4ed8'}}>Partially Approved</span> :
                      <span className="badge badge-draft">Drafting</span>}
                   </td>
                 </tr>
@@ -48,6 +49,11 @@ export default function TeamDashboard() {
             })}
           </tbody>
         </table>
+        {myTeam.length === 0 && (
+          <div className="p-10 text-center text-slate-500 font-medium">
+            No direct reports found. Assign employees to this manager in User Management.
+          </div>
+        )}
       </div>
     </div>
   );
