@@ -1,47 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
+import { AppContext } from './store/AppContext';
 import Layout from './components/Layout';
-import EmployeeDashboard from './pages/EmployeeDashboard';
-import ManagerDashboard from './pages/ManagerDashboard';
-import AdminDashboard from './pages/AdminDashboard';
+import Login from './pages/Login';
+import MyGoals from './pages/employee/MyGoals';
+import Approvals from './pages/manager/Approvals';
+import Analytics from './pages/admin/Analytics';
+// Placeholders for other pages to prevent crash
+const Placeholder = ({ title }) => <div className="p-8"><h1>{title}</h1><p>Under Construction</p></div>;
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { currentUser } = useContext(AppContext);
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(currentUser.role)) return <Navigate to="/dashboard/my-goals" replace />;
+  return children;
+};
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('atomquest_user');
-    if (saved) {
-      setCurrentUser(JSON.parse(saved));
-    }
-  }, []);
-
-  const handleLogin = (user) => {
-    setCurrentUser(user);
-    localStorage.setItem('atomquest_user', JSON.stringify(user));
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('atomquest_user');
-  };
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={!currentUser ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
+        <Route path="/login" element={<Login />} />
         
-        {currentUser ? (
-          <Route element={<Layout currentUser={currentUser} onLogout={handleLogout} />}>
-            <Route path="/" element={
-              currentUser.role === 'employee' ? <EmployeeDashboard currentUser={currentUser} /> :
-              currentUser.role === 'manager' ? <ManagerDashboard currentUser={currentUser} /> :
-              <AdminDashboard currentUser={currentUser} />
-            } />
-          </Route>
-        ) : (
-          <Route path="*" element={<Navigate to="/login" />} />
-        )}
+        <Route path="/dashboard" element={<Layout />}>
+          <Route index element={<Navigate to="/dashboard/my-goals" replace />} />
+          
+          {/* Employee Routes */}
+          <Route path="my-goals" element={<ProtectedRoute><MyGoals /></ProtectedRoute>} />
+          <Route path="checkin" element={<ProtectedRoute><Placeholder title="Check-In" /></ProtectedRoute>} />
+          
+          {/* Manager Routes */}
+          <Route path="team" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><Placeholder title="Team Dashboard" /></ProtectedRoute>} />
+          <Route path="approvals" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><Approvals /></ProtectedRoute>} />
+          <Route path="shared-goals" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><Placeholder title="Shared Goals" /></ProtectedRoute>} />
+
+          {/* Admin Routes */}
+          <Route path="analytics" element={<ProtectedRoute allowedRoles={['admin']}><Analytics /></ProtectedRoute>} />
+          <Route path="cycle-config" element={<ProtectedRoute allowedRoles={['admin']}><Placeholder title="Cycle Config" /></ProtectedRoute>} />
+          <Route path="escalations" element={<ProtectedRoute allowedRoles={['admin']}><Placeholder title="Escalation Log" /></ProtectedRoute>} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
