@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { AppContext } from '../store/AppContext';
-import { Target, CheckSquare, Users, BarChart2, LogOut, Settings, ShieldAlert, LayoutDashboard, AlertTriangle, Bell, X } from 'lucide-react';
+import { Target, CheckSquare, Users, BarChart2, LogOut, ShieldAlert, LayoutDashboard, Bell, X, AlertTriangle } from 'lucide-react';
 import AtomBot from './AtomBot';
 
 export default function Layout() {
@@ -10,182 +10,167 @@ export default function Layout() {
   const activeCycle = cycles.find(c => c.isActive);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
-  // Popup reminder (manager sends)
   const activeReminder = notifications?.find(n => n.userId === currentUser?.id && n.type === 'reminder_popup' && !n.read);
-
-  // All unread notifications for bell badge
   const myUnread = notifications?.filter(n => n.userId === currentUser?.id && !n.read && n.type !== 'reminder_popup') || [];
   const myNotifs = notifications?.filter(n => n.userId === currentUser?.id && n.type !== 'reminder_popup').slice().reverse().slice(0, 5) || [];
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
-  const dismissReminder = () => {
-    if (!activeReminder) return;
-    const updated = notifications.map(n => n.id === activeReminder.id ? { ...n, read: true } : n);
-    saveNotifications(updated);
-  };
-
   const markAllRead = () => {
-    const updated = notifications.map(n => n.userId === currentUser?.id ? { ...n, read: true } : n);
+    const updated = notifications.map(n => n.userId === currentUser.id ? { ...n, read: true } : n);
     saveNotifications(updated);
   };
 
-  const navItemClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-medium ${isActive ? 'bg-primary-600 text-white shadow-md shadow-primary-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`;
-
-  const notifIcon = (type) => {
-    if (type === 'goal_assigned') return '📋';
-    if (type === 'goal_approved') return '✅';
-    if (type === 'goal_returned') return '↩️';
-    if (type === 'checkin_reminder') return '⏰';
-    return '🔔';
+  const dismissReminder = (id) => {
+    const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
+    saveNotifications(updated);
   };
+
+  if (!currentUser) return null;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden relative">
-
-      {/* Reminder Popup Modal */}
-      {activeReminder && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-6">
-              <AlertTriangle size={32} className="text-amber-600" />
-            </div>
-            <h3 className="text-2xl font-extrabold text-center text-slate-900 mb-2">{activeReminder.title}</h3>
-            <p className="text-center text-slate-600 font-medium mb-8 leading-relaxed">{activeReminder.message}</p>
-            <button onClick={dismissReminder} className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md">
-              I Understand, Go to Check-ins
-            </button>
-          </div>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-slate-50 flex font-sans">
       {/* Sidebar */}
-      <div className="w-72 bg-dark text-white flex flex-col m-4 rounded-3xl shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-
-        <div className="p-8 pb-4 relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary-600 p-2 rounded-xl shadow-lg">
-              <LayoutDashboard size={24} className="text-white" />
-            </div>
-            <h2 className="text-2xl font-extrabold text-white tracking-tight">AtomQuest</h2>
+      <aside className="w-72 bg-dark text-slate-300 flex flex-col fixed inset-y-0 shadow-2xl z-20">
+        <div className="p-8 flex items-center gap-3">
+          <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+            <Target className="text-white" size={24} />
           </div>
+          <span className="text-2xl font-black text-white tracking-tighter italic">ATOMQUEST</span>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto relative z-10">
-          <div className="px-4 mb-2 text-xs font-bold text-slate-500 uppercase tracking-widest">Employee</div>
-          <NavLink to="/dashboard/my-goals" className={navItemClass}><Target size={20} /> My Goals</NavLink>
-          <NavLink to="/dashboard/checkin" className={navItemClass}><CheckSquare size={20} /> Check-in</NavLink>
-          <NavLink to="/dashboard/notifications" className={navItemClass}><Target size={20} /> Notifications</NavLink>
+        <nav className="flex-1 px-4 py-4 space-y-1">
+          <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Core Journey</p>
+          
+          <NavLink to="/dashboard/my-goals" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+            <Target size={20} className="group-hover:scale-110 transition-transform" />
+            <span className="font-semibold">My Goals</span>
+          </NavLink>
 
-          {(currentUser?.role === 'manager' || currentUser?.role === 'admin') && (<>
-            <div className="mt-8 mb-2 px-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Manager Tools</div>
-            <NavLink to="/dashboard/team" className={navItemClass}><Users size={20} /> Team Overview</NavLink>
-            <NavLink to="/dashboard/approvals" className={navItemClass}><CheckSquare size={20} /> Approvals</NavLink>
-            <NavLink to="/dashboard/shared-goals" className={navItemClass}><Target size={20} /> Push KPIs</NavLink>
-            <NavLink to="/dashboard/team-checkins" className={navItemClass}><CheckSquare size={20} /> Team Check-ins</NavLink>
-          </>)}
+          <NavLink to="/dashboard/checkin" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+            <CheckSquare size={20} className="group-hover:scale-110 transition-transform" />
+            <span className="font-semibold">Check-ins</span>
+          </NavLink>
 
-          {currentUser?.role === 'admin' && (<>
-            <div className="mt-8 mb-2 px-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Admin Console</div>
-            <NavLink to="/dashboard/analytics" className={navItemClass}><BarChart2 size={20} /> Analytics</NavLink>
-            <NavLink to="/dashboard/completion" className={navItemClass}><Target size={20} /> Completion Dash</NavLink>
-            <NavLink to="/dashboard/cycle-config" className={navItemClass}><Settings size={20} /> Configuration</NavLink>
-            <NavLink to="/dashboard/escalations" className={navItemClass}><ShieldAlert size={20} /> Escalations</NavLink>
-            <NavLink to="/dashboard/audit" className={navItemClass}><CheckSquare size={20} /> Audit Trail</NavLink>
-            <NavLink to="/dashboard/users" className={navItemClass}><Users size={20} /> User Management</NavLink>
-          </>)}
+          {(currentUser.role === 'manager' || currentUser.role === 'admin') && (
+            <div className="pt-8 space-y-1">
+              <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Management</p>
+              <NavLink to="/dashboard/team" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+                <LayoutDashboard size={20} />
+                <span className="font-semibold">Team View</span>
+              </NavLink>
+              <NavLink to="/dashboard/approvals" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+                <CheckSquare size={20} />
+                <span className="font-semibold">Approvals</span>
+              </NavLink>
+              <NavLink to="/dashboard/shared-goals" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+                <Users size={20} />
+                <span className="font-semibold">Shared Goals</span>
+              </NavLink>
+            </div>
+          )}
+
+          {currentUser.role === 'admin' && (
+            <div className="pt-8 space-y-1">
+              <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Administration</p>
+              <NavLink to="/dashboard/analytics" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+                <BarChart2 size={20} />
+                <span className="font-semibold">Analytics</span>
+              </NavLink>
+              <NavLink to="/dashboard/audit" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+                <ShieldAlert size={20} />
+                <span className="font-semibold">Audit Trail</span>
+              </NavLink>
+            </div>
+          )}
         </nav>
 
-        <div className="p-4 m-4 bg-slate-800/50 rounded-2xl border border-slate-700 flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-inner">
-              {currentUser?.name?.charAt(0)}
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white leading-tight">{currentUser?.name}</p>
-              <p className="text-xs text-slate-400 capitalize mt-0.5">{currentUser?.role}</p>
-            </div>
-          </div>
-          <button onClick={handleLogout} className="text-slate-400 hover:text-white transition-colors p-2 bg-slate-700/50 hover:bg-slate-600 rounded-xl">
-            <LogOut size={16} />
+        <div className="p-4 mt-auto">
+          <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-4 rounded-2xl bg-slate-800/50 text-slate-400 hover:text-white hover:bg-red-500/10 hover:text-red-500 transition-all group">
+            <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
+            <span className="font-bold uppercase text-xs tracking-wider">Sign Out</span>
           </button>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="h-24 flex items-center justify-between px-10 shrink-0">
-          <div>
-            <h1 className="text-2xl font-extrabold text-slate-800">Welcome back, {currentUser?.name.split(' ')[0]} 👋</h1>
-            <p className="text-sm text-slate-500 mt-1 font-medium">Here is what's happening with your goals today.</p>
-          </div>
+      <div className="flex-1 ml-72 flex flex-col min-h-screen">
+        <header className="h-24 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-10 sticky top-0 z-10">
           <div className="flex items-center gap-4">
-            <span className="bg-white border border-slate-200 text-slate-700 text-sm font-bold px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              {activeCycle ? `${activeCycle.name}` : 'No Active Cycle'}
-            </span>
+            <div className="h-10 w-[2px] bg-slate-200"></div>
+            <p className="text-slate-500 font-medium">Cycle: <span className="text-primary-700 font-bold">{activeCycle?.name || 'Loading...'}</span></p>
+          </div>
 
-            {/* 🔔 Notification Bell with Red Dot */}
+          <div className="flex items-center gap-6">
+            {/* Notification Bell */}
             <div className="relative">
-              <button
+              <button 
                 onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-                className="relative w-11 h-11 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-all hover:border-primary-300"
+                className="p-3 bg-slate-100 text-slate-600 rounded-2xl hover:bg-primary-50 hover:text-primary-600 transition-all relative group"
               >
-                <Bell size={20} className="text-slate-600" />
+                <Bell size={22} className="group-hover:rotate-12 transition-transform" />
                 {myUnread.length > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-extrabold rounded-full flex items-center justify-center shadow-md animate-pulse">
                     {myUnread.length > 9 ? '9+' : myUnread.length}
                   </span>
                 )}
               </button>
-
-              {/* Dropdown */}
+              
               {showNotifDropdown && (
-                <div className="absolute right-0 top-14 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-40 overflow-hidden">
-                  <div className="flex items-center justify-between p-4 border-b border-slate-100">
-                    <h3 className="font-extrabold text-slate-800">Notifications</h3>
-                    <div className="flex items-center gap-2">
-                      {myUnread.length > 0 && (
-                        <button onClick={markAllRead} className="text-xs text-primary-600 font-bold hover:underline">Mark all read</button>
-                      )}
-                      <button onClick={() => setShowNotifDropdown(false)} className="text-slate-400 hover:text-slate-600">
-                        <X size={16} />
-                      </button>
-                    </div>
+                <div className="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                    <p className="font-bold text-slate-800">Notifications</p>
+                    <button onClick={markAllRead} className="text-xs font-bold text-primary-600 hover:underline">Mark all read</button>
                   </div>
-                  <div className="max-h-72 overflow-y-auto">
+                  <div className="max-h-[400px] overflow-y-auto">
                     {myNotifs.length === 0 ? (
-                      <div className="p-6 text-center text-slate-400 text-sm">No notifications yet</div>
+                      <div className="p-8 text-center text-slate-400 text-sm italic">All caught up! No new alerts.</div>
                     ) : (
                       myNotifs.map(n => (
-                        <div key={n.id} className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!n.read ? 'bg-primary-50' : ''}`}>
-                          <div className="flex gap-3 items-start">
-                            <span className="text-xl mt-0.5">{notifIcon(n.type)}</span>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-bold truncate ${!n.read ? 'text-slate-900' : 'text-slate-600'}`}>{n.title}</p>
-                              <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
-                              <p className="text-xs text-slate-400 mt-1">{new Date(n.timestamp).toLocaleString()}</p>
-                            </div>
-                            {!n.read && <div className="w-2 h-2 rounded-full bg-primary-500 mt-1.5 shrink-0"></div>}
+                        <div key={n.id} className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-3 ${!n.read ? 'bg-primary-50/30' : ''}`}>
+                          <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${!n.read ? 'bg-primary-500' : 'bg-slate-200'}`}></div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800">{n.title}</p>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">{n.message}</p>
+                            <p className="text-[10px] text-slate-400 mt-2 font-medium">{new Date(n.timestamp).toLocaleTimeString()}</p>
                           </div>
                         </div>
                       ))
                     )}
                   </div>
-                  <div className="p-3 border-t border-slate-100 text-center">
-                    <button onClick={() => { navigate('/dashboard/notifications'); setShowNotifDropdown(false); }} className="text-xs text-primary-600 font-bold hover:underline">
-                      View all notifications →
-                    </button>
-                  </div>
                 </div>
               )}
+            </div>
+
+            <div className="flex items-center gap-4 bg-slate-100/50 p-2 pr-6 rounded-2xl border border-slate-100">
+              <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md">
+                {currentUser?.name?.charAt(0)}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800 leading-none">{currentUser?.name}</p>
+                <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-wider">{currentUser?.role}</p>
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-10 pb-10">
+        <main className="p-10 flex-1">
+          {activeReminder && (
+             <div className="mb-8 bg-amber-50 border-2 border-amber-200 p-6 rounded-3xl flex items-center justify-between animate-in zoom-in-95 duration-300">
+                <div className="flex items-center gap-5">
+                   <div className="bg-amber-100 p-3 rounded-2xl text-amber-600">
+                      <AlertTriangle size={28} />
+                   </div>
+                   <div>
+                      <h4 className="text-amber-900 font-bold text-lg">Deadline Reminder</h4>
+                      <p className="text-amber-700 font-medium">{activeReminder.message}</p>
+                   </div>
+                </div>
+                <button onClick={() => dismissReminder(activeReminder.id)} className="p-3 hover:bg-amber-100 rounded-2xl transition-colors text-amber-500">
+                   <X size={24} />
+                </button>
+             </div>
+          )}
           <Outlet />
         </main>
       </div>
