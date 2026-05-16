@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect } from 'react';
 
 export const AppContext = createContext();
 
-// Essential demo users so the user can actually login to test
 const initialUsers = [
   { id: 'emp1', name: 'Varun Employee', email: 'employee@atomberg.com', password: 'password123', role: 'employee', managerId: 'mgr1', dept: 'Engineering' },
   { id: 'mgr1', name: 'Atom Manager', email: 'manager@atomberg.com', password: 'password123', role: 'manager', dept: 'Engineering' },
@@ -24,13 +23,13 @@ export const AppProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    // 🚀 CLEAN SLATE MIGRATION (V5)
-    // Ensures that old username-based data doesn't break the new email-based login.
-    const currentVersion = 'atomquest_v5_stable';
+    // 🛡️ SSR Safety Check
+    if (typeof window === 'undefined') return;
+
+    const currentVersion = 'atomquest_v6_stable';
     const installedVersion = localStorage.getItem('atomquest_version');
 
     if (installedVersion !== currentVersion) {
-      // Clear old data to prevent crashes
       localStorage.removeItem('atomquest_users');
       localStorage.removeItem('atomquest_goals');
       localStorage.removeItem('atomquest_notifications');
@@ -63,6 +62,7 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   const persist = (key, value) => {
+    if (typeof window === 'undefined') return;
     setTimeout(() => {
       try {
         localStorage.setItem(key, JSON.stringify(value));
@@ -81,11 +81,12 @@ export const AppProvider = ({ children }) => {
   const saveCycles = (updated) => { setCycles(updated); persist('atomquest_cycles', updated); };
 
   const login = (email, password) => {
-    // Case-insensitive email check for demo convenience
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
     if (user) {
       setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+      }
       return true;
     }
     return false;
@@ -93,7 +94,9 @@ export const AppProvider = ({ children }) => {
 
   const logout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentUser');
+    }
   };
 
   return (
