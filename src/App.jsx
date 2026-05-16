@@ -4,10 +4,13 @@ import { AppContext } from './store/AppContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import MyGoals from './pages/employee/MyGoals';
+import CheckIn from './pages/employee/CheckIn';
+import TeamDashboard from './pages/manager/TeamDashboard';
 import Approvals from './pages/manager/Approvals';
+import SharedGoals from './pages/manager/SharedGoals';
 import Analytics from './pages/admin/Analytics';
-// Placeholders for other pages to prevent crash
-const Placeholder = ({ title }) => <div className="p-8"><h1>{title}</h1><p>Under Construction</p></div>;
+import CycleConfig from './pages/admin/CycleConfig';
+import EscalationLog from './pages/admin/EscalationLog';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser } = useContext(AppContext);
@@ -27,17 +30,17 @@ export default function App() {
           
           {/* Employee Routes */}
           <Route path="my-goals" element={<ProtectedRoute><MyGoals /></ProtectedRoute>} />
-          <Route path="checkin" element={<ProtectedRoute><Placeholder title="Check-In" /></ProtectedRoute>} />
+          <Route path="checkin" element={<ProtectedRoute><CheckIn /></ProtectedRoute>} />
           
           {/* Manager Routes */}
-          <Route path="team" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><Placeholder title="Team Dashboard" /></ProtectedRoute>} />
+          <Route path="team" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><TeamDashboard /></ProtectedRoute>} />
           <Route path="approvals" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><Approvals /></ProtectedRoute>} />
-          <Route path="shared-goals" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><Placeholder title="Shared Goals" /></ProtectedRoute>} />
+          <Route path="shared-goals" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><SharedGoals /></ProtectedRoute>} />
 
           {/* Admin Routes */}
           <Route path="analytics" element={<ProtectedRoute allowedRoles={['admin']}><Analytics /></ProtectedRoute>} />
-          <Route path="cycle-config" element={<ProtectedRoute allowedRoles={['admin']}><Placeholder title="Cycle Config" /></ProtectedRoute>} />
-          <Route path="escalations" element={<ProtectedRoute allowedRoles={['admin']}><Placeholder title="Escalation Log" /></ProtectedRoute>} />
+          <Route path="cycle-config" element={<ProtectedRoute allowedRoles={['admin']}><CycleConfig /></ProtectedRoute>} />
+          <Route path="escalations" element={<ProtectedRoute allowedRoles={['admin']}><EscalationLog /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />
