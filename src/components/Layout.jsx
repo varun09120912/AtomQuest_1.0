@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { AppContext } from '../store/AppContext';
 import { Target, CheckSquare, Users, BarChart2, LogOut, Settings, ShieldAlert, LayoutDashboard, AlertTriangle, Bell, X } from 'lucide-react';
+import AtomBot from './AtomBot';
 
 export default function Layout() {
   const { currentUser, logout, cycles, notifications, saveNotifications } = useContext(AppContext);
@@ -188,6 +189,8 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      {/* AtomBot Floating Assistant */}
+      <AtomBot />
     </div>
   );
 }
