@@ -31,7 +31,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
       {/* Sidebar */}
-      <aside className="w-72 bg-dark text-slate-300 flex flex-col fixed inset-y-0 shadow-2xl z-20">
+      <aside className="w-72 bg-dark text-slate-300 flex flex-col fixed inset-y-0 shadow-2xl z-20 overflow-y-auto custom-scrollbar">
         <div className="p-8 flex items-center gap-3">
           <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
             <Target className="text-white" size={24} />
@@ -94,7 +94,7 @@ export default function Layout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 ml-72 flex flex-col min-h-screen">
+      <div className="flex-1 ml-72 flex flex-col min-h-screen overflow-x-hidden">
         <header className="h-24 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-10 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <div className="h-10 w-[2px] bg-slate-200"></div>
