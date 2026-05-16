@@ -44,14 +44,26 @@ export default function TeamCheckIns() {
 
       <div className="space-y-8">
         {myTeam.map(emp => {
+          const empGoals = goals.filter(g => g.employeeId === emp.id && g.status === 'approved');
           const empCheckIns = teamCheckIns.filter(c => c.employeeId === emp.id);
+
+          if (empGoals.length === 0) {
+            return (
+              <div key={emp.id} className="glass-panel p-6 flex justify-between items-center border-l-4 border-l-slate-400 bg-slate-50 opacity-70">
+                <div>
+                  <h3 className="font-bold text-slate-800 text-lg">{emp.name}</h3>
+                  <p className="text-slate-500 text-sm font-medium">No approved goals yet. Cannot perform check-in.</p>
+                </div>
+              </div>
+            );
+          }
           
           if (empCheckIns.length === 0) {
             return (
               <div key={emp.id} className="glass-panel p-6 flex justify-between items-center border-l-4 border-l-amber-400">
                 <div>
                   <h3 className="font-bold text-slate-800 text-lg">{emp.name}</h3>
-                  <p className="text-amber-600 text-sm font-medium">Check-in not submitted yet.</p>
+                  <p className="text-amber-600 text-sm font-medium">Has approved goals, but Q1 Check-in not submitted yet.</p>
                 </div>
                 <button onClick={() => handleSendReminder(emp)} className="btn-secondary text-amber-700 border-amber-200 hover:bg-amber-50">Send Reminder</button>
               </div>
