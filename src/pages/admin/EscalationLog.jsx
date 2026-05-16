@@ -3,12 +3,11 @@ import { AppContext } from '../../store/AppContext';
 import { ShieldAlert, Check } from 'lucide-react';
 
 export default function EscalationLog() {
-  const { escalations, setEscalations, users } = useContext(AppContext);
+  const { escalations, saveEscalations, users } = useContext(AppContext);
 
   const resolveEscalation = (id) => {
-    const updated = escalations.map(e => e.id === id ? { ...e, resolved: true, resolvedAt: Date.now() } : e);
-    setEscalations(updated);
-    localStorage.setItem('atomquest_escalations', JSON.stringify(updated));
+    const updated = escalations.map(e => e.id === id ? { ...e, resolved: true, resolvedAt: Date.now(), resolvedBy: 'Admin' } : e);
+    saveEscalations(updated);
   };
 
   return (

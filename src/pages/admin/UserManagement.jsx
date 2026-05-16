@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { Users, UserPlus, Trash2, Edit2 } from 'lucide-react';
 
 export default function UserManagement() {
-  const { users, setUsers } = useContext(AppContext);
+  const { users, saveUsers } = useContext(AppContext);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
@@ -17,17 +17,10 @@ export default function UserManagement() {
     e.preventDefault();
     if (editingId) {
       const updated = users.map(u => u.id === editingId ? { ...u, ...formData } : u);
-      setUsers(updated);
-      localStorage.setItem('atomquest_users', JSON.stringify(updated));
+      saveUsers(updated);
     } else {
-      const newUser = {
-        ...formData,
-        id: 'u' + Date.now(),
-        grade: 'L1'
-      };
-      const updated = [...users, newUser];
-      setUsers(updated);
-      localStorage.setItem('atomquest_users', JSON.stringify(updated));
+      const newUser = { ...formData, id: 'u' + Date.now(), grade: 'L1' };
+      saveUsers([...users, newUser]);
     }
     setShowForm(false);
     setEditingId(null);
@@ -41,10 +34,8 @@ export default function UserManagement() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to deactivate this user?')) {
-      const updated = users.filter(u => u.id !== id);
-      setUsers(updated);
-      localStorage.setItem('atomquest_users', JSON.stringify(updated));
+    if (window.confirm('Are you sure you want to remove this user?')) {
+      saveUsers(users.filter(u => u.id !== id));
     }
   };
 

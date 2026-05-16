@@ -14,8 +14,13 @@ export default function CheckIn() {
     const a = Number(actual);
     const t = Number(target);
     if (isNaN(a) || isNaN(t) || t === 0) return 0;
-    if (uom === 'numeric_min' || uom === 'percent_min') return Math.min((a / t) * 100, 100).toFixed(0);
-    if (uom === 'numeric_max' || uom === 'percent_max') return Math.min((t / a) * 100, 100).toFixed(0);
+    // Lower is better: full score if actual <= target, partial if above target
+    if (uom === 'numeric_min' || uom === 'percent_min') {
+      if (a <= t) return 100;
+      return Math.max(0, Math.round((t / a) * 100));
+    }
+    // Higher is better
+    if (uom === 'numeric_max' || uom === 'percent_max') return Math.min(Math.round((a / t) * 100), 100);
     if (uom === 'timeline') return new Date(actual) <= new Date(target) ? 100 : 0;
     if (uom === 'zero') return a === 0 ? 100 : 0;
     return 0;
@@ -43,12 +48,7 @@ export default function CheckIn() {
     };
 
     const updatedCI = [...checkIns.filter(c => !(c.goalId === goalId && c.quarter === activeCycle?.phase)), newCheckIn];
-    if (saveCheckIns) {
-      saveCheckIns(updatedCI);
-    } else {
-      import('../../store/AppContext').then(() => {});
-      localStorage.setItem('atomquest_checkIns', JSON.stringify(updatedCI));
-    }
+    saveCheckIns(updatedCI);
 
     // Notify manager that check-in was submitted
     const mgr = currentUser.managerId;
