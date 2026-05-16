@@ -40,6 +40,9 @@ export default function Layout() {
           <NavLink to="/dashboard/checkin" className={navItemClass}>
             <CheckSquare size={20} /> Check-in
           </NavLink>
+          <NavLink to="/dashboard/notifications" className={navItemClass}>
+            <Target size={20} /> Notifications
+          </NavLink>
 
           {(currentUser?.role === 'manager' || currentUser?.role === 'admin') && (
             <>
@@ -53,6 +56,9 @@ export default function Layout() {
               <NavLink to="/dashboard/shared-goals" className={navItemClass}>
                 <Target size={20} /> Push KPIs
               </NavLink>
+              <NavLink to="/dashboard/team-checkins" className={navItemClass}>
+                <CheckSquare size={20} /> Team Check-ins
+              </NavLink>
             </>
           )}
 
@@ -62,11 +68,20 @@ export default function Layout() {
               <NavLink to="/dashboard/analytics" className={navItemClass}>
                 <BarChart2 size={20} /> Analytics
               </NavLink>
+              <NavLink to="/dashboard/completion" className={navItemClass}>
+                <Target size={20} /> Completion Dash
+              </NavLink>
               <NavLink to="/dashboard/cycle-config" className={navItemClass}>
                 <Settings size={20} /> Configuration
               </NavLink>
               <NavLink to="/dashboard/escalations" className={navItemClass}>
                 <ShieldAlert size={20} /> Escalations
+              </NavLink>
+              <NavLink to="/dashboard/audit" className={navItemClass}>
+                <CheckSquare size={20} /> Audit Trail
+              </NavLink>
+              <NavLink to="/dashboard/users" className={navItemClass}>
+                <Users size={20} /> User Management
               </NavLink>
             </>
           )}
