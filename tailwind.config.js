@@ -6,9 +6,28 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+      },
       colors: {
-        primary: '#2563eb',
-        dark: '#1e293b'
+        primary: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+        },
+        dark: '#0f172a',
+        surface: '#ffffff',
+        background: '#f8fafc',
+      },
+      boxShadow: {
+        'premium': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+        'premium-hover': '0 10px 25px -5px rgba(0, 0, 0, 0.08)',
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
       }
     },
   },
