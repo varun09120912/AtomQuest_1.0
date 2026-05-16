@@ -56,14 +56,14 @@ export default function AuditTrail() {
             {auditLog.length === 0 ? (
                <tr><td colSpan="4" className="p-8 text-center text-slate-500 font-medium">No audit logs available.</td></tr>
             ) : (
-              {[...auditLog].sort((a,b) => b.timestamp - a.timestamp).map(log => (
+              [...auditLog].sort((a,b) => b.timestamp - a.timestamp).map(log => (
                 <tr key={log.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="p-5 text-sm text-slate-500 whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</td>
                   <td className="p-5 font-bold text-slate-800">{log.actor}</td>
                   <td className="p-5 text-primary-700 font-medium">{log.action}</td>
                   <td className="p-5 text-slate-600 text-sm">{log.details}</td>
                 </tr>
-              ))}
+              ))
             )}
           </tbody>
         </table>
