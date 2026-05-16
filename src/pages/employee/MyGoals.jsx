@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { Target, Plus, Trash2, Lock, AlertCircle } from 'lucide-react';
 
 export default function MyGoals() {
-  const { currentUser, goals, saveGoals, cycles } = useContext(AppContext);
+  const { currentUser, goals, saveGoals, cycles, notifications, setNotifications, auditLog, saveAuditLog, users } = useContext(AppContext);
   const activeCycle = cycles.find(c => c.isActive) || cycles[0];
   
   const [showForm, setShowForm] = useState(false);
@@ -19,8 +19,8 @@ export default function MyGoals() {
   const handleAddGoal = (e) => {
     e.preventDefault();
     if (myGoals.length >= 8) return alert('Maximum 8 goals allowed.');
-    if (newGoal.weightage < 10) return alert('Minimum weightage is 10%.');
-    if (totalWeightage + Number(newGoal.weightage) > 100) return alert('Total weightage cannot exceed 100%.');
+    if (Number(newGoal.weightage) < 10) return alert('Minimum weightage is 10%.');
+    if (totalWeightage + Number(newGoal.weightage) > 100) return alert(`Total weightage cannot exceed 100%. You have ${100 - totalWeightage}% remaining.`);
 
     const goal = {
       ...newGoal,
@@ -44,9 +44,50 @@ export default function MyGoals() {
   };
 
   const handleSubmit = () => {
-    if (totalWeightage !== 100) return alert('Total weightage must be exactly 100% to submit.');
-    const updated = goals.map(g => g.employeeId === currentUser.id ? { ...g, status: 'pending', updatedAt: Date.now() } : g);
+    if (totalWeightage !== 100) return alert(`Total weightage must be exactly 100% to submit. Currently: ${totalWeightage}%.`);
+    if (myGoals.filter(g => g.status === 'draft' || g.status === 'returned').length === 0)
+      return alert('No draft goals to submit.');
+
+    // Only move draft/returned → pending; leave approved ones untouched
+    const updated = goals.map(g =>
+      (g.employeeId === currentUser.id && (g.status === 'draft' || g.status === 'returned'))
+        ? { ...g, status: 'pending', updatedAt: Date.now() }
+        : g
+    );
     saveGoals(updated);
+
+    // Notify the employee's manager
+    const manager = users.find(u => u.id === currentUser.managerId);
+    if (manager && notifications !== undefined) {
+      const notif = {
+        id: 'n' + Date.now(),
+        userId: manager.id,
+        title: 'Goal Sheet Submitted for Approval',
+        message: `${currentUser.name} has submitted ${myGoals.filter(g => g.status === 'draft' || g.status === 'returned').length} goals for your approval. Total weightage: ${totalWeightage}%.`,
+        type: 'approval_request',
+        timestamp: Date.now(),
+        read: false
+      };
+      const updatedN = [...(notifications || []), notif];
+      setNotifications(updatedN);
+      localStorage.setItem('atomquest_notifications', JSON.stringify(updatedN));
+    }
+
+    // Add audit log
+    if (saveAuditLog) {
+      const entry = {
+        id: 'al' + Date.now(),
+        timestamp: Date.now(),
+        actor: currentUser.name,
+        role: currentUser.role,
+        action: 'GOALS_SUBMITTED',
+        affectedPerson: currentUser.name,
+        details: `Submitted ${myGoals.filter(g => g.status === 'draft' || g.status === 'returned').length} goals for manager approval. Total weightage: ${totalWeightage}%.`
+      };
+      saveAuditLog([...(auditLog || []), entry]);
+    }
+
+    alert('✅ Goals submitted for approval! Your manager has been notified.');
   };
 
   return (
