@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { Target, Edit2, Users } from 'lucide-react';
 
 export default function SharedGoals() {
-  const { currentUser, users, goals, setGoals, cycles } = useContext(AppContext);
+  const { currentUser, users, goals, setGoals, cycles, notifications, setNotifications } = useContext(AppContext);
   const activeCycle = cycles.find(c => c.isActive) || cycles[0];
   
   // Admin can push to ANYONE, Manager can push to MY TEAM
@@ -51,10 +51,25 @@ export default function SharedGoals() {
          updatedAt: Date.now()
        }));
 
+       // 🔔 Create a notification for each recipient
+       const newNotifications = selectedEmployees.map(empId => ({
+         id: 'n' + Date.now() + Math.random(),
+         userId: empId,
+         title: 'New Goal Assigned to You',
+         message: `${currentUser.name} has assigned you a new goal: "${newGoal.title}". Please review it in My Goals and adjust your weightage.`,
+         type: 'goal_assigned',
+         timestamp: Date.now(),
+         read: false
+       }));
+
+       const updatedNotifs = [...notifications, ...newNotifications];
+       setNotifications(updatedNotifs);
+       localStorage.setItem('atomquest_notifications', JSON.stringify(updatedNotifs));
+
        const updated = [...goals, ...newGoals];
        setGoals(updated);
        localStorage.setItem('atomquest_goals', JSON.stringify(updated));
-       alert('Goal successfully pushed to selected team members!');
+       alert('Goal successfully pushed to selected team members! They have been notified.');
     }
     
     setNewGoal({ title: '', description: '', thrustArea: 'Financial', uom: 'numeric_max', target: '' });
