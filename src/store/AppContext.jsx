@@ -38,6 +38,29 @@ export const AppProvider = ({ children }) => {
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
   }, []);
 
+  // ─── FIX: Deferred persist
+  // State updates React immediately (fast UI paint).
+  // localStorage write is deferred with setTimeout(0) so the browser
+  // can render FIRST, then persist — eliminating the 1,944ms INP block.
+  const persist = (key, value) => {
+    setTimeout(() => {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn('localStorage write failed:', e);
+      }
+    }, 0);
+  };
+
+  // Smart save wrappers: update React state instantly, write disk asynchronously
+  const saveGoals = (updated) => { setGoals(updated); persist('atomquest_goals', updated); };
+  const saveCheckIns = (updated) => { setCheckIns(updated); persist('atomquest_checkIns', updated); };
+  const saveEscalations = (updated) => { setEscalations(updated); persist('atomquest_escalations', updated); };
+  const saveNotifications = (updated) => { setNotifications(updated); persist('atomquest_notifications', updated); };
+  const saveAuditLog = (updated) => { setAuditLog(updated); persist('atomquest_auditLog', updated); };
+  const saveUsers = (updated) => { setUsers(updated); persist('atomquest_users', updated); };
+  const saveCycles = (updated) => { setCycles(updated); persist('atomquest_cycles', updated); };
+
   const login = (email, password) => {
     const user = users.find(u => u.email === email && u.password === password);
     if (user) {
@@ -56,7 +79,9 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{
       users, cycles, goals, checkIns, escalations, notifications, auditLog, currentUser,
-      login, logout, setGoals, setCheckIns, setEscalations, setNotifications, setAuditLog
+      login, logout,
+      setGoals, setCheckIns, setEscalations, setNotifications, setAuditLog, setUsers, setCycles,
+      saveGoals, saveCheckIns, saveEscalations, saveNotifications, saveAuditLog, saveUsers, saveCycles
     }}>
       {children}
     </AppContext.Provider>

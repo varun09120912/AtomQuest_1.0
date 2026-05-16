@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { CheckSquare, AlertCircle } from 'lucide-react';
 
 export default function Approvals() {
-  const { currentUser, goals, setGoals, users } = useContext(AppContext);
+  const { currentUser, goals, saveGoals, users } = useContext(AppContext);
   const myTeam = users.filter(u => u.managerId === currentUser.id);
   const teamIds = myTeam.map(u => u.id);
   
@@ -14,16 +14,14 @@ export default function Approvals() {
     const updated = goals.map(g => 
       (g.employeeId === employeeId && g.status === 'pending') ? { ...g, status: 'approved', updatedAt: Date.now() } : g
     );
-    setGoals(updated);
-    localStorage.setItem('atomquest_goals', JSON.stringify(updated));
+    saveGoals(updated);
   };
 
   const handleReturnAll = (employeeId) => {
     const updated = goals.map(g => 
       (g.employeeId === employeeId && g.status === 'pending') ? { ...g, status: 'returned', updatedAt: Date.now() } : g
     );
-    setGoals(updated);
-    localStorage.setItem('atomquest_goals', JSON.stringify(updated));
+    saveGoals(updated);
   };
 
   return (

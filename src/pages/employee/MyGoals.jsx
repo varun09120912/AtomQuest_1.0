@@ -3,7 +3,7 @@ import { AppContext } from '../../store/AppContext';
 import { Target, Plus, Trash2, Lock, AlertCircle } from 'lucide-react';
 
 export default function MyGoals() {
-  const { currentUser, goals, setGoals, cycles } = useContext(AppContext);
+  const { currentUser, goals, saveGoals, cycles } = useContext(AppContext);
   const activeCycle = cycles.find(c => c.isActive) || cycles[0];
   
   const [showForm, setShowForm] = useState(false);
@@ -33,23 +33,20 @@ export default function MyGoals() {
     };
     
     const updated = [...goals, goal];
-    setGoals(updated);
-    localStorage.setItem('atomquest_goals', JSON.stringify(updated));
+    saveGoals(updated);
     setShowForm(false);
     setNewGoal({ title: '', description: '', thrustArea: 'Financial', uom: 'numeric_max', target: '', weightage: '' });
   };
 
   const handleDelete = (id) => {
     const updated = goals.filter(g => g.id !== id);
-    setGoals(updated);
-    localStorage.setItem('atomquest_goals', JSON.stringify(updated));
+    saveGoals(updated);
   };
 
   const handleSubmit = () => {
     if (totalWeightage !== 100) return alert('Total weightage must be exactly 100% to submit.');
     const updated = goals.map(g => g.employeeId === currentUser.id ? { ...g, status: 'pending', updatedAt: Date.now() } : g);
-    setGoals(updated);
-    localStorage.setItem('atomquest_goals', JSON.stringify(updated));
+    saveGoals(updated);
   };
 
   return (
